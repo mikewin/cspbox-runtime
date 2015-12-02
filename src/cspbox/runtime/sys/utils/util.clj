@@ -1,6 +1,6 @@
 (ns cspbox.runtime.sys.utils.util
-  (:require [clojure.set :as set]
-            [clojure.tools.logging :as log]))
+  (:require [clojure.set :as set]))
+            ;[taoensso.timbre :as log]
 
 (defn conv2pair
   "convert content to pair"
@@ -172,7 +172,7 @@
   (cond
     (coll? coll) (empty2nil (set/difference (set coll) items))
     (keyword? coll)  (if (get items coll) nil #{coll})
-     :else   (do (when coll (log/info "coll:" coll "type:" (type coll))) nil)))
+     :else   nil));(do (when coll (log/info "coll:" coll "type:" (type coll))) nil)))
 
 (defn reverse-map
   "reverse map from {k2 v2,k1 v1} -> {v2 k2 , v1 k1}"

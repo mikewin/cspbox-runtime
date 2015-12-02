@@ -2,7 +2,7 @@
   (:require [cspbox.runtime.sys.utils.util :refer [empty2nil comp-func* pickup remove-items]]
             [clojure.set :refer [difference]]
             [cspbox.runtime.sys.emit.state.use :refer [state-get state-set]]))
-            ;[clojure.tools.logging :as log]
+
 
 
 ;; todo f[] -> f[arg]
