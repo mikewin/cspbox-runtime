@@ -1,7 +1,7 @@
 (ns cspbox.runtime.tools.csv
   (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]
-            [semantic-csv.core :as sc :refer [->float ->long]]
+            [semantic-csv.core :as sc :refer [->float ->long ->int]]
             [cspbox.runtime.tools.markdown :as md]
             [cspbox.runtime.tools.write :refer [write-file]]))
 
@@ -24,14 +24,16 @@
 
 (defn read-parse-cvs
   "use semantic-csv to convert cvs data to table"
-  [file number & [conv-map]]
-  (let [conv-fn (change-keyword conv-map)]
+  [file & [{:keys [number conv-map cast-map]}]]
+  (let [conv-fn (change-keyword conv-map)
+        number  (or number 200)
+        cast-map (or cast-map {:open ->float :close ->float :high ->float :low ->float :volume ->long})]
     (with-open [in-file (io/reader file)]
       (->> (csv/read-csv in-file)
            (take-numbers number)
            sc/mappify
            conv-fn
-           (sc/cast-with {:open ->float :close ->float :high ->float :low ->float :volume ->long})
+           (sc/cast-with cast-map)
            doall))))
 
 
@@ -55,6 +57,7 @@
 (defn write-vector-csv
   "use semantic-cvs to write a vector map to cvs"
   [{:keys [file append header]} data]
+  (assert file "write csv should have a file name")
   (when file
     (let [append? (atom (or append false))
           csv-file  (io/file file)]
@@ -77,7 +80,10 @@
         header    (first csv-data)
         body      (next csv-data)
         md-data  (md/md-table header body)]
-    (write-file md-file nil md-data)))
+    (write-file md-file nil md-data)
+    md-file))
+
+
 
 
 ;;test
@@ -107,4 +113,9 @@
                       :prepend-header  true}
                      data))
   (conv-csv-md "e:/work/autorun/cspbox/draft/log/test.csv")
+  (conv-csv-md "e:/work/autorun/cspbox/draft/log/order.csv")
+  (let [file "e:/work/autorun/cspbox/draft/log/order.csv"
+      cast-map {:price ->float :quantity ->int}
+      conv-map {:oqt :quantity :opc :price}]
+  (read-parse-cvs file ))
   )
